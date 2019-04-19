@@ -29,15 +29,15 @@
             <charset>UTF-8</charset>
         </encoder>
         <!-- 此日志文件只记录info级别的 -->
-      <!--  <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>error</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>-->
+        <!--  <filter class="ch.qos.logback.classic.filter.LevelFilter">
+              <level>error</level>
+              <onMatch>ACCEPT</onMatch>
+              <onMismatch>DENY</onMismatch>
+          </filter>-->
     </appender>
 
     <root level="info">
-        <appender-ref ref="STDOUT" />
-        <!--<appender-ref ref="rollingFileAppender" />-->
+        <!--<appender-ref ref="STDOUT" />-->
+        <appender-ref ref="rollingFileAppender"/>
     </root>
 </configuration>

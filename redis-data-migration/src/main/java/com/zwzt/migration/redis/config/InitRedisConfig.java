@@ -43,20 +43,53 @@ public class InitRedisConfig {
     @Value("${redis.read.timeout}")
     private Integer readTimeout;
 
+    @Value("${redis.timeout}")
+    private Integer timeout;
+
     @Value("${redis.maxWaitMillis}")
     private Integer maxWaitMillis;
+
+    @Value("${redis.testOnCreate}")
+    private boolean testOnCreate;
 
     @Value("${redis.testOnBorrow}")
     private boolean testOnBorrow;
 
+    @Value("${redis.testWhileIdle}")
+    private boolean testWhileIdle;
 
-    private JedisClientConfiguration jedisClientConfiguration(){
-
-        return JedisClientConfiguration.builder().connectTimeout(Duration.ofMillis(connectTimeout)).readTimeout(Duration.ofMillis(readTimeout)).build();
-
+    @Bean
+    public JedisPoolConfig jedisPoolConfig() {
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        //最大连接数
+        jedisPoolConfig.setMaxTotal(maxTotal);
+        //最小空闲连接数
+        jedisPoolConfig.setMinIdle(maxIdle);
+        //当池内没有可用的连接时，最大等待时间
+        jedisPoolConfig.setMaxWaitMillis(maxWaitMillis);
+        jedisPoolConfig.setTestOnCreate(testOnCreate);
+        jedisPoolConfig.setTestOnBorrow(testOnBorrow);
+        jedisPoolConfig.setTestWhileIdle(testWhileIdle);
+        return jedisPoolConfig;
     }
 
-    private RedisConfiguration init(int db){
+    @Bean
+    public JedisClientConfiguration jedisClientConfiguration(JedisPoolConfig jedisPoolConfig) {
+
+        //return JedisClientConfiguration.builder().connectTimeout(Duration.ofMillis(connectTimeout)).readTimeout(Duration.ofMillis(readTimeout)).build();
+
+        JedisClientConfiguration.DefaultJedisClientConfigurationBuilder djcb = (JedisClientConfiguration.DefaultJedisClientConfigurationBuilder) JedisClientConfiguration.builder();
+        djcb.readTimeout(Duration.ofMillis(readTimeout));
+        djcb.connectTimeout(Duration.ofMillis(connectTimeout));
+        djcb.usePooling();
+        djcb.poolConfig(jedisPoolConfig);
+
+        //通过构造器来构造jedis客户端配置
+        JedisClientConfiguration jedisClientConfiguration = djcb.build();
+        return jedisClientConfiguration;
+    }
+
+    private RedisConfiguration init(int db) {
         RedisStandaloneConfiguration redisConfiguration =
                 new RedisStandaloneConfiguration(redisHost, redisPort);
         redisConfiguration.setDatabase(db);
@@ -80,20 +113,17 @@ public class InitRedisConfig {
      */
     @Bean("jedisConnectionFactory_source")
     @Primary
-    public JedisConnectionFactory jedisConnectionFactory_source() {
+    public JedisConnectionFactory jedisConnectionFactory_source(JedisClientConfiguration jedisClientConfiguration) {
         RedisConfiguration redisConfiguration_source = redisConfiguration_source();
         JedisConnectionFactory jedisConnectionFactory = null;
         if (redisConfiguration_source instanceof RedisStandaloneConfiguration) {
-            jedisConnectionFactory = new JedisConnectionFactory((RedisStandaloneConfiguration) redisConfiguration_source,jedisClientConfiguration());
-        }
-        else if (redisConfiguration_source instanceof RedisSentinelConfiguration) {
-            jedisConnectionFactory = new JedisConnectionFactory((RedisSentinelConfiguration) redisConfiguration_source,jedisClientConfiguration());
-        }
-        else if (redisConfiguration_source instanceof RedisClusterConfiguration) {
-            jedisConnectionFactory = new JedisConnectionFactory((RedisClusterConfiguration) redisConfiguration_source,jedisClientConfiguration());
-        }
-        else{
-            jedisConnectionFactory = new JedisConnectionFactory((RedisStandaloneConfiguration) redisConfiguration_source,jedisClientConfiguration());
+            jedisConnectionFactory = new JedisConnectionFactory((RedisStandaloneConfiguration) redisConfiguration_source, jedisClientConfiguration);
+        } else if (redisConfiguration_source instanceof RedisSentinelConfiguration) {
+            jedisConnectionFactory = new JedisConnectionFactory((RedisSentinelConfiguration) redisConfiguration_source, jedisClientConfiguration);
+        } else if (redisConfiguration_source instanceof RedisClusterConfiguration) {
+            jedisConnectionFactory = new JedisConnectionFactory((RedisClusterConfiguration) redisConfiguration_source, jedisClientConfiguration);
+        } else {
+            jedisConnectionFactory = new JedisConnectionFactory((RedisStandaloneConfiguration) redisConfiguration_source, jedisClientConfiguration);
         }
         return jedisConnectionFactory;
     }
@@ -104,19 +134,19 @@ public class InitRedisConfig {
      * @return 配置好的Jedis连接工厂
      */
     @Bean("jedisConnectionFactory_desc")
-    public JedisConnectionFactory jedisConnectionFactory_desc() {
+    public JedisConnectionFactory jedisConnectionFactory_desc(JedisClientConfiguration jedisClientConfiguration) {
         RedisConfiguration redisConfiguration_desc = this.redisConfiguration_desc();
 
         if (redisConfiguration_desc instanceof RedisStandaloneConfiguration) {
-            return new JedisConnectionFactory((RedisStandaloneConfiguration) redisConfiguration_desc,jedisClientConfiguration());
+            return new JedisConnectionFactory((RedisStandaloneConfiguration) redisConfiguration_desc, jedisClientConfiguration);
         }
         if (redisConfiguration_desc instanceof RedisSentinelConfiguration) {
-            return new JedisConnectionFactory((RedisSentinelConfiguration) redisConfiguration_desc,jedisClientConfiguration());
+            return new JedisConnectionFactory((RedisSentinelConfiguration) redisConfiguration_desc, jedisClientConfiguration);
         }
         if (redisConfiguration_desc instanceof RedisClusterConfiguration) {
-            return new JedisConnectionFactory((RedisClusterConfiguration) redisConfiguration_desc,jedisClientConfiguration());
+            return new JedisConnectionFactory((RedisClusterConfiguration) redisConfiguration_desc, jedisClientConfiguration);
         }
-        return new JedisConnectionFactory((RedisStandaloneConfiguration) redisConfiguration_desc,jedisClientConfiguration());
+        return new JedisConnectionFactory((RedisStandaloneConfiguration) redisConfiguration_desc, jedisClientConfiguration);
     }
 
 

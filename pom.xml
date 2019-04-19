@@ -10,10 +10,10 @@
     </parent>
 
     <groupId>com.zwzt</groupId>
-    <artifactId>migration</artifactId>
+    <artifactId>dataMigration</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>migration</name>
+    <name>dataMigration</name>
 
     <properties>
         <java.version>1.8</java.version>
@@ -27,6 +27,7 @@
 
     <modules>
         <module>redis-data-migration</module>
+        <module>certificate</module>
     </modules>
 
     <dependencies>

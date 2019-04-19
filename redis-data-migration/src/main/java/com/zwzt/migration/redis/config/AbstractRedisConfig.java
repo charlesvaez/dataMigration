@@ -12,7 +12,7 @@ public abstract class AbstractRedisConfig {
 
     abstract JedisConnectionFactory getJedisConnectionFactory();
 
-    protected RedisTemplate initRedisTemplate(){
+    protected RedisTemplate initRedisTemplate() {
         /*
          * Redis 序列化器.
          *
@@ -42,7 +42,7 @@ public abstract class AbstractRedisConfig {
 
     }
 
-    protected CacheManager initRedisCacheManager(){
+    protected CacheManager initRedisCacheManager() {
         RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager
                 .RedisCacheManagerBuilder.fromConnectionFactory(getJedisConnectionFactory());
         return builder.build();

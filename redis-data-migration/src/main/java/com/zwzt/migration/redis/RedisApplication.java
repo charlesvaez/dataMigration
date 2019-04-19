@@ -16,51 +16,56 @@ import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
 public class RedisApplication implements ApplicationRunner {
-	private final static Logger logger = LoggerFactory.getLogger(RedisApplication.class);
+    private final static Logger logger = LoggerFactory.getLogger(RedisApplication.class);
 
-	@Autowired
-	@Qualifier("redisTemplate_source")
-	private RedisTemplate redisTemplate_source;
+    @Autowired
+    @Qualifier("redisTemplate_source")
+    private RedisTemplate redisTemplate_source;
 
-	@Autowired
-	@Qualifier("redisTemplate_desc")
-	private RedisTemplate redisTemplate_desc;
+    @Autowired
+    @Qualifier("redisTemplate_desc")
+    private RedisTemplate redisTemplate_desc;
 
-	public static void main(String[] args) {
-		SpringApplication.run(RedisApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(RedisApplication.class, args);
+    }
 
-	@Override
-	public void run(ApplicationArguments args) throws Exception {
-		new Thread(){
-			@Override
-			public void run() {
-				logger.info("重试线程启动!");
-				LinkedBlockingQueue queue = TestController.queue();
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        new Thread() {
+            @Override
+            public void run() {
+                logger.info("重试线程启动!");
+                LinkedBlockingQueue queue = TestController.queue();
 
-				while(true){
-					String key = null;
-					try{
-						key = queue.take()+"";
-						logger.info("重试key-{}",key);
+                while (true) {
+                    String key = null;
+                    try {
+                        key = queue.take() + "";
+                        logger.info("重试key-{}", key);
 
-						byte[] value = redisTemplate_source.dump(key);
+                        byte[] value = redisTemplate_source.dump(key);
 
-						redisTemplate_desc.restore(key, value, 0, TimeUnit.MILLISECONDS);
+                        redisTemplate_desc.restore(key, value, 0, TimeUnit.MILLISECONDS);
+                        logger.info("key-{},重试成功", key);
 
-					} catch(Exception e){
-						logger.error("key-{"+key+"}，数据重试迁移失败",e);
-					}finally {
-						logger.info("key-{},重试成功",key);
-					}
+                    } catch (Exception e) {
+                        logger.error("key-{" + key + "}，数据重试迁移失败", e);
+
+                        try {
+                            queue.put(key);
+                        } catch (InterruptedException e1) {
+                            logger.error("key-{" + key + "}，重放队列失败", e1);
+                        }
+                    }
 
 //					try {
 //						TimeUnit.SECONDS.sleep(1);
 //					} catch (InterruptedException e) {
 //						logger.error("休眠异常",e);
 //					}
-				}
-			}
-		}.start();
-	}
+                }
+            }
+        }.start();
+    }
 }

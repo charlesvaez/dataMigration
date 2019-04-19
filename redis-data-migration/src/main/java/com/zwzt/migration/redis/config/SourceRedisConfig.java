@@ -33,7 +33,7 @@ public class SourceRedisConfig extends AbstractRedisConfig {
     @Override
     @Primary
     JedisConnectionFactory getJedisConnectionFactory() {
-        System.out.println("source db: "+jedisConnectionFactory.getDatabase());
+        System.out.println("source db: " + jedisConnectionFactory.getDatabase());
         return jedisConnectionFactory;
     }
 }

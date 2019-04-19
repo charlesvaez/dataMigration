@@ -9,17 +9,17 @@ public class LinkedBlockingQueueTest {
 //    private static final LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 
     public static void main(String[] args) {
-       final  LinkedBlockingQueue queue = TestController.queue();
+        final LinkedBlockingQueue queue = TestController.queue();
 
-        new Thread(){
+        new Thread() {
             @Override
             public void run() {
-                while(true){
+                while (true) {
 
                     try {
-                        String key = System.currentTimeMillis()+"";
+                        String key = System.currentTimeMillis() + "";
                         queue.put(key);
-                        System.out.println("put key - "+key);
+                        System.out.println("put key - " + key);
 
                         Thread.sleep(3000L);
                     } catch (InterruptedException e) {
@@ -30,13 +30,13 @@ public class LinkedBlockingQueueTest {
             }
         }.start();
 
-        new Thread(){
+        new Thread() {
             @Override
             public void run() {
-                while(true){
+                while (true) {
                     try {
-                        String value = queue.take() +"";
-                        System.out.println("take value - "+value);
+                        String value = queue.take() + "";
+                        System.out.println("take value - " + value);
 
 //                        Thread.sleep(1000L);
                     } catch (InterruptedException e) {
@@ -55,7 +55,6 @@ public class LinkedBlockingQueueTest {
             e.printStackTrace();
         }
     }
-
 
 
 }

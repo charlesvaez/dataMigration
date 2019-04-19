@@ -20,7 +20,7 @@ public class DescRedisConfig extends AbstractRedisConfig {
     @Qualifier("jedisConnectionFactory_desc")
     private JedisConnectionFactory jedisConnectionFactory;
 
-    @Bean(value="redisTemplate_desc")
+    @Bean(value = "redisTemplate_desc")
     public RedisTemplate<Object, Object> redisTemplate() {
         return initRedisTemplate();
     }
@@ -32,7 +32,7 @@ public class DescRedisConfig extends AbstractRedisConfig {
 
     @Override
     JedisConnectionFactory getJedisConnectionFactory() {
-        System.out.println("desc db: "+ jedisConnectionFactory.getDatabase());
+        System.out.println("desc db: " + jedisConnectionFactory.getDatabase());
         return jedisConnectionFactory;
     }
 }
